@@ -5,5 +5,3 @@ SUBDIRS += \
     hash_algorithms \
     app \
     tests
-
-hash.depends = hash_algorithms
