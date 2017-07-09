@@ -105,7 +105,6 @@ std::string Md5::get_hash()
 void Md5::add_padding()
 {
     std::array<uint32_t, 16> padding_buffer;
-    padding_buffer.fill(0);
     if(buffer_.size() > 0)
     {
         buffer_.push_back(1 << 7);
@@ -116,6 +115,7 @@ void Md5::add_padding()
         {
             run_round(*reinterpret_cast<std::array<uint32_t, 16>*>(&buffer_[0]));
             buffer_.clear();
+            padding_buffer.fill(0);
         }
         else
         {
@@ -124,6 +124,7 @@ void Md5::add_padding()
     }
     else
     {
+        padding_buffer.fill(0);
         padding_buffer[0] = 1 << 7;
     }
     *reinterpret_cast<uint64_t*>(&padding_buffer[14]) = data_bytes_processed_*8;
