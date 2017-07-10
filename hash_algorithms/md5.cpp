@@ -132,13 +132,13 @@ void Md5::add_padding()
 
 }
 
-void Md5::hash_data(std::vector<uint8_t> data)
+void Md5::hash_data(const std::vector<uint8_t> &data)
 {
     if(data.size() > 0)
         hash_data(&data[0], data.size());
 }
 
-void Md5::hash_data(uint8_t* data, size_t len)
+void Md5::hash_data(const uint8_t* data, size_t len)
 {
     auto processed_bytes = 0;
     // handle previous buffered data if any
@@ -159,7 +159,7 @@ void Md5::hash_data(uint8_t* data, size_t len)
     //Process buffer
     while(len - processed_bytes >= bytes_per_round)
     {
-        run_round(*reinterpret_cast<std::array<uint32_t, 16>*>(&data[processed_bytes]));
+        run_round(*reinterpret_cast<const std::array<uint32_t, 16>*>(&data[processed_bytes]));
         processed_bytes += bytes_per_round;
     }
     //Buffer remainder of message
@@ -171,7 +171,7 @@ void Md5::hash_data(uint8_t* data, size_t len)
     data_bytes_processed_ += len;
 }
 
-void Md5::run_round(std::array<uint32_t, 16> data)
+void Md5::run_round(const std::array<uint32_t, 16> &data)
 {
 #ifdef PRINT_MD5_PROCESSED_DATA
     uint8_t *bytes = (uint8_t *)&data[0];
