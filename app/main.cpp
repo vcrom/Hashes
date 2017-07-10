@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <vector>
 
 struct ProgramArgs
@@ -81,9 +82,9 @@ int main(int argc, char * argv[])
             data = std::vector<uint8_t>(args.data.begin(), args.data.end());
         }
 
-        Md5 hasher;
-        hasher.hash_data(data);
-        std::cout << hasher.get_hash() << std::endl;
+        std::unique_ptr<HashingAlgorithm> hasher = std::make_unique<Md5> ();
+        hasher->hash_data(data);
+        std::cout << hasher->get_hash() << std::endl;
     }
     else
     {

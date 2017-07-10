@@ -22,10 +22,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    md5.cpp
+    md5.cpp \
+    hashing_algorithm.cpp
 
 HEADERS += \
-    md5.h
+    md5.h \
+    hashing_algorithm.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

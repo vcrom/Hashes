@@ -69,20 +69,28 @@ constexpr auto g4(const uint32_t &idx)
 }
 }
 
-Md5::Md5()
+Md5::Md5() :
+    HashingAlgorithm(bytes_per_round)
 {
-    buffer_.reserve(bytes_per_round);
     reset();
 }
 
 void Md5::reset()
 {
+    HashingAlgorithm::reset();
     a_ = 0x67452301;
     b_ = 0xefcdab89;
     c_ = 0x98badcfe;
     d_ = 0x10325476;
-    buffer_.clear();
-    data_bytes_processed_ = 0;
+}
+
+
+std::string Md5::get_hash()
+{
+    add_padding();
+    const auto digest = compute_digest();
+    reset();
+    return digest;
 }
 
 std::string Md5::compute_digest()
@@ -94,81 +102,9 @@ std::string Md5::compute_digest()
     return buffer.str();
 }
 
-std::string Md5::get_hash()
+void Md5::run_round(const uint32_t *data)
 {
-    add_padding();
-    const auto digest = compute_digest();
-    reset();
-    return digest;
-}
-
-void Md5::add_padding()
-{
-    std::array<uint32_t, 16> padding_buffer;
-    if(buffer_.size() > 0)
-    {
-        buffer_.push_back(1 << 7);
-        const auto buffer_size = buffer_.size();
-        buffer_.resize(bytes_per_round, 0);
-        // Check if there are enough bytes to embed the 64 bit message size
-        if(bytes_per_round - buffer_size < 8)
-        {
-            run_round(*reinterpret_cast<std::array<uint32_t, 16>*>(&buffer_[0]));
-            buffer_.clear();
-            padding_buffer.fill(0);
-        }
-        else
-        {
-            padding_buffer = *reinterpret_cast<std::array<uint32_t, 16>*>(&buffer_[0]);
-        }
-    }
-    else
-    {
-        padding_buffer.fill(0);
-        padding_buffer[0] = 1 << 7;
-    }
-    *reinterpret_cast<uint64_t*>(&padding_buffer[14]) = data_bytes_processed_*8;
-    run_round(padding_buffer);
-
-}
-
-void Md5::hash_data(const std::vector<uint8_t> &data)
-{
-    if(data.size() > 0)
-        hash_data(&data[0], data.size());
-}
-
-void Md5::hash_data(const uint8_t* data, size_t len)
-{
-    auto processed_bytes = 0;
-    // handle previous buffered data if any
-    if(buffer_.size() > 0)
-    {
-        for(size_t i = buffer_.size();
-            i < bytes_per_round && processed_bytes < len;
-            ++i, ++processed_bytes)
-        {
-            buffer_.emplace_back(data[processed_bytes]);
-        }
-        if(buffer_.size() == bytes_per_round)
-        {
-            run_round(*reinterpret_cast<std::array<uint32_t, 16>*>(&buffer_[0]));
-            buffer_.clear();
-        }
-    }
-    //Process buffer
-    while(len - processed_bytes >= bytes_per_round)
-    {
-        run_round(*reinterpret_cast<const std::array<uint32_t, 16>*>(&data[processed_bytes]));
-        processed_bytes += bytes_per_round;
-    }
-    //Buffer remainder of message
-    while(processed_bytes < len)
-    {
-        buffer_.emplace_back(data[processed_bytes]);
-        ++processed_bytes;
-    }
-    data_bytes_processed_ += len;
+    run_round(*reinterpret_cast<const std::array<uint32_t, 16>*>(data));
 }
 
 void Md5::run_round(const std::array<uint32_t, 16> &data)
