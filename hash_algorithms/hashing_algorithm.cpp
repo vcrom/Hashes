@@ -62,16 +62,16 @@ void HashingAlgorithm::add_padding()
         if(bytes_consumed_per_round_ - buffer_size < 8)
         {
             run_round(reinterpret_cast<const uint32_t*>(&buffer_[0]));
-            std::fill(buffer_.begin(), buffer_.end()/*+buffer_size*/, 0);
+            std::fill(buffer_.begin(), buffer_.begin()+buffer_size, 0);
         }
     }
     else
     {
-        std::fill(buffer_.begin(), buffer_.end(), 0);
         buffer_.resize(bytes_consumed_per_round_, 0);
         buffer_[0] = 1 << 7;
     }
     auto offest_to_size_bits = buffer_.size() - 8;
     *reinterpret_cast<uint64_t*>(&buffer_[offest_to_size_bits]) = data_bytes_processed_*8;
     run_round(reinterpret_cast<const uint32_t*>(&buffer_[0]));
+    buffer_.clear();
 }
