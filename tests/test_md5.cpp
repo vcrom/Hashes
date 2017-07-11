@@ -4,13 +4,17 @@
 
 using namespace testing;
 
-class TestMd5 : public Test {
+class TestMd5 : public Test
+{
 protected:
-    virtual void SetUp() {
+    virtual void SetUp()
+    {
         md5_ = std::make_unique<Md5>();
     }
-
-    virtual void TearDown() {}
+    virtual void TearDown()
+    {
+        md5_.reset();
+    }
 
     std::unique_ptr<Md5> md5_;
 };
