@@ -5,7 +5,6 @@
 
 #include <array>
 #include <string>
-#include <vector>
 
 class Md5 : public HashingAlgorithm
 {
