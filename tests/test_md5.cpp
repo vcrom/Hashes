@@ -38,3 +38,16 @@ TEST_F(TestMd5, simple_string2)
     md5_->hash_data(std::vector<uint8_t>(str.begin(), str.end()));
     EXPECT_EQ("e4d909c290d0fb1ca068ffaddf22cbd0", md5_->get_hash());
 }
+
+TEST_F(TestMd5, multiple_execs_same_hash)
+{
+    const auto str = std::string("The fairy tale");
+    const auto data = std::vector<uint8_t>(str.begin(), str.end());
+    md5_->hash_data(data);
+    const auto first = md5_->get_hash();
+    for(size_t i = 0; i < 10; ++i)
+    {
+        md5_->hash_data(data);
+        EXPECT_EQ(first, md5_->get_hash());
+    }
+}
