@@ -23,11 +23,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     md5.cpp \
-    hashing_algorithm.cpp
+    hashing_algorithm.cpp \
+    sha1.cpp
 
 HEADERS += \
     md5.h \
-    hashing_algorithm.h
+    hashing_algorithm.h \
+    sha1.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

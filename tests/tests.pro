@@ -9,7 +9,8 @@ CONFIG -= qt
 HEADERS +=    
 
 SOURCES +=     main.cpp \
-    test_md5.cpp
+    test_md5.cpp \
+    test_sha1.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../hash_algorithms/release/ -lhash_algorithms
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../hash_algorithms/debug/ -lhash_algorithms
