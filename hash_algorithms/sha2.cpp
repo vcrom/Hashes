@@ -161,11 +161,11 @@ void Sha2::run_round(const std::array<uint32_t, 64> &data)
     h7_ += h;
 }
 
-void Sha2::sha2_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d, uint32_t &e,
+inline void Sha2::sha2_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d, uint32_t &e,
                                 uint32_t &f, uint32_t &g, uint32_t &h,
                                 uint32_t data, uint32_t k)
 {
-    const auto s1   = right_rotate(e, 8) ^ right_rotate(e, 11) ^ right_rotate(e, 25);
+    const auto s1   = right_rotate(e, 6) ^ right_rotate(e, 11) ^ right_rotate(e, 25);
     const auto ch   = (e & f) ^ ((~e) & g);
     const auto tmp1 = h + s1 + ch + k +data;
     const auto s0   = right_rotate(a, 2) ^ right_rotate(a, 13) ^ right_rotate(a, 22);
