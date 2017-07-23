@@ -132,7 +132,7 @@ void Sha1::run_round(const std::array<uint32_t, 80> &data)
     e_ += e;
 }
 
-void Sha1::sha1_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d, uint32_t &e,
+inline void Sha1::sha1_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d, uint32_t &e,
                            uint32_t data, uint32_t f, uint32_t k)
 {
     const auto temp = left_rotate(a, 5) + f + e + data + k;

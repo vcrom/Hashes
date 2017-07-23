@@ -137,7 +137,7 @@ void Md5::run_round(const std::array<uint32_t, 16> &data)
     d_ += d;
 }
 
-void Md5::md5_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d,
+inline void Md5::md5_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d,
                            uint32_t data, uint32_t f, uint32_t k, uint8_t shift)
 {
     auto tmp = d;
