@@ -15,7 +15,7 @@ public:
 protected:
     union
     {
-        std::array<uint32_t, 5> hash_;
+        std::array<uint32_t, 8> hash_;
         struct
         {
             uint32_t h0_, h1_, h2_, h3_, h4_, h5_, h6_, h7_;
