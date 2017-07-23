@@ -1,4 +1,4 @@
-#include "sha1.h"
+#include "sha2.h"
 #include <gtest/gtest.h>
 #include <memory>
 
@@ -9,7 +9,7 @@ class TestSha2 : public Test
 protected:
     virtual void SetUp()
     {
-        hasher_ = std::make_unique<Sha1>();
+        hasher_ = std::make_unique<Sha2>();
     }
 
     virtual void TearDown()
@@ -17,27 +17,27 @@ protected:
         hasher_.reset();
     }
 
-    std::unique_ptr<Sha1> hasher_;
+    std::unique_ptr<Sha2> hasher_;
 };
 
 TEST_F(TestSha2, empty)
 {
     hasher_->hash_data(nullptr, 0);
-    EXPECT_EQ("d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f", hasher_->get_hash());
+    EXPECT_EQ("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", hasher_->get_hash());
 }
 
 TEST_F(TestSha2, simple_string1)
 {
     const auto str = std::string("The quick brown fox jumps over the lazy dog");
     hasher_->hash_data(std::vector<uint8_t>(str.begin(), str.end()));
-    EXPECT_EQ("730e109bd7a8a32b1cb9d9a09aa2325d2430587ddbc0c38bad911525", hasher_->get_hash());
+    EXPECT_EQ("26b54a596255364bf3b1d9b4df2fd33d61974d1f000df23b6f7de4313a6c72e5", hasher_->get_hash());
 }
 
 TEST_F(TestSha2, simple_string2)
 {
     const auto str = std::string("The quick brown fox jumps over the lazy dog.");
     hasher_->hash_data(std::vector<uint8_t>(str.begin(), str.end()));
-    EXPECT_EQ("619cba8e8e05826e9b8c519c0a5c68f4fb653e8a3d8aa04bb2c8cd4c", hasher_->get_hash());
+    EXPECT_EQ("47398c0ae3a363a1c8df74a5ff0f8a64f739b95335991095996be6e4e20b7525", hasher_->get_hash());
 }
 
 TEST_F(TestSha2, multiple_execs_same_hash)
