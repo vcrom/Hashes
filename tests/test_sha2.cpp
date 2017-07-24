@@ -20,6 +20,13 @@ protected:
     std::unique_ptr<Sha2> hasher_;
 };
 
+TEST_F(TestSha2, simple_abc)
+{
+    const auto str = std::string("abc");
+    hasher_->hash_data(std::vector<uint8_t>(str.begin(), str.end()));
+    EXPECT_EQ("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", hasher_->get_hash());
+}
+
 TEST_F(TestSha2, empty)
 {
     hasher_->hash_data(nullptr, 0);
@@ -30,14 +37,14 @@ TEST_F(TestSha2, simple_string1)
 {
     const auto str = std::string("The quick brown fox jumps over the lazy dog");
     hasher_->hash_data(std::vector<uint8_t>(str.begin(), str.end()));
-    EXPECT_EQ("26b54a596255364bf3b1d9b4df2fd33d61974d1f000df23b6f7de4313a6c72e5", hasher_->get_hash());
+    EXPECT_EQ("d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592", hasher_->get_hash());
 }
 
 TEST_F(TestSha2, simple_string2)
 {
     const auto str = std::string("The quick brown fox jumps over the lazy dog.");
     hasher_->hash_data(std::vector<uint8_t>(str.begin(), str.end()));
-    EXPECT_EQ("47398c0ae3a363a1c8df74a5ff0f8a64f739b95335991095996be6e4e20b7525", hasher_->get_hash());
+    EXPECT_EQ("ef537f25c895bfa782526529a9b63d97aa631564d5d789c2b765448c8635fb6c", hasher_->get_hash());
 }
 
 TEST_F(TestSha2, multiple_execs_same_hash)
