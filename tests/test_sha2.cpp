@@ -20,17 +20,18 @@ protected:
     std::unique_ptr<Sha2> hasher_;
 };
 
-TEST_F(TestSha2, simple_abc)
-{
-    const auto str = std::string("abc");
-    hasher_->hash_data(std::vector<uint8_t>(str.begin(), str.end()));
-    EXPECT_EQ("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", hasher_->get_hash());
-}
 
 TEST_F(TestSha2, empty)
 {
     hasher_->hash_data(nullptr, 0);
     EXPECT_EQ("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", hasher_->get_hash());
+}
+
+TEST_F(TestSha2, simple_abc)
+{
+    const auto str = std::string("abc");
+    hasher_->hash_data(std::vector<uint8_t>(str.begin(), str.end()));
+    EXPECT_EQ("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", hasher_->get_hash());
 }
 
 TEST_F(TestSha2, simple_string1)
