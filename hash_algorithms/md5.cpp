@@ -8,7 +8,6 @@
 
 namespace
 {
-constexpr size_t bytes_per_round = 64;
 constexpr std::array<uint8_t, 64> shifts = {
     7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
     5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
@@ -67,6 +66,7 @@ constexpr auto g4(const uint32_t &idx)
 {
     return (7*idx)%16;
 }
+constexpr size_t bytes_per_round = 64;
 }
 
 Md5::Md5() :
@@ -78,16 +78,16 @@ Md5::Md5() :
 void Md5::reset()
 {
     HashingAlgorithm::reset();
-    a_ = 0x67452301;
-    b_ = 0xefcdab89;
-    c_ = 0x98badcfe;
-    d_ = 0x10325476;
+    h0_ = 0x67452301;
+    h1_ = 0xefcdab89;
+    h2_ = 0x98badcfe;
+    h3_ = 0x10325476;
 }
 
 
-std::string Md5::get_hash()
+std::string Md5::get_digest()
 {
-    add_padding();
+    flush_end_of_message();
     const auto digest = compute_digest();
     reset();
     return digest;
@@ -116,10 +116,10 @@ void Md5::run_round(const std::array<uint32_t, 16> &data)
     std::cout << std::endl;
 #endif // PRINT_MD5_PROCESSED_DATA
 
-    auto a = a_;
-    auto b = b_;
-    auto c = c_;
-    auto d = d_;
+    auto a = h0_;
+    auto b = h1_;
+    auto c = h2_;
+    auto d = h3_;
 
     auto i = 0u;
     for(; i < 16; ++i)
@@ -131,10 +131,10 @@ void Md5::run_round(const std::array<uint32_t, 16> &data)
     for(; i < 64; ++i)
         md5_operation_round(a, b, c, d, data[g4(i)], f4(b, c, d), k_values[i], shifts[i]);
 
-    a_ += a;
-    b_ += b;
-    c_ += c;
-    d_ += d;
+    h0_ += a;
+    h1_ += b;
+    h2_ += c;
+    h3_ += d;
 }
 
 inline void Md5::md5_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d,

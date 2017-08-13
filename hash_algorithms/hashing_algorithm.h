@@ -9,7 +9,7 @@ class HashingAlgorithm
 public:
     HashingAlgorithm(const size_t bytes_per_round);
 
-    virtual std::string get_hash() = 0;
+    virtual std::string get_digest() = 0;
     virtual void reset();
 
     void hash_data(const std::vector<uint8_t> &data);
@@ -17,7 +17,7 @@ public:
 
 protected:
     virtual void run_round(const uint32_t *data) = 0;
-    virtual void add_padding();
+    virtual void flush_end_of_message();
 
     size_t bytes_consumed_per_round_;
     uint64_t data_bytes_processed_;

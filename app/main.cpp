@@ -84,7 +84,7 @@ int main(int argc, char * argv[])
 
         std::unique_ptr<HashingAlgorithm> hasher = std::make_unique<Md5> ();
         hasher->hash_data(data);
-        std::cout << hasher->get_hash() << std::endl;
+        std::cout << hasher->get_digest() << std::endl;
     }
     else
     {

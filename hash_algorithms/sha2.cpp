@@ -1,5 +1,7 @@
 #include "sha2.h"
 
+#include "hash_utils.h"
+
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -8,9 +10,10 @@
 //#define PRINT_Sha2_CONSUMED_DATA
 //#define PRINT_Sha2_PROCESSED_DATA
 
+using namespace hash_utils;
+
 namespace
 {
-constexpr size_t bytes_per_round = 64;
 constexpr std::array<uint32_t, 64> k_values = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
     0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -30,28 +33,6 @@ constexpr std::array<uint32_t, 64> k_values = {
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-constexpr auto left_rotate(uint32_t a, uint8_t b)
-{
-    return (a << b) | (a >> (32u - b));
-}
-
-constexpr auto right_rotate(uint32_t a, uint8_t b)
-{
-    return (a << (32u - b)) | (a >> b);
-}
-
-inline uint32_t swap_uint32( uint32_t val )
-{
-    val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF );
-    return (val << 16) | (val >> 16);
-}
-uint64_t swap_uint64( uint64_t val )
-{
-    val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
-    val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
-    return (val << 32) | (val >> 32);
-}
-
 constexpr auto f1(const uint32_t &b, const uint32_t &c, const uint32_t &d)
 {
     return (b & c) | ((~b) & d);
@@ -68,7 +49,9 @@ constexpr auto f4(const uint32_t &b, const uint32_t &c, const uint32_t &d)
 {
     return f2(b, c, d);
 }
+constexpr size_t bytes_per_round = 64;
 }
+
 Sha2::Sha2() :
     HashingAlgorithm(bytes_per_round)
 {
@@ -88,9 +71,9 @@ void Sha2::reset()
     h7_ = 0x5be0cd19;
 }
 
-std::string Sha2::get_hash()
+std::string Sha2::get_digest()
 {
-    add_padding();
+    flush_end_of_message();
     const auto digest = compute_digest();
     reset();
     return digest;
@@ -107,10 +90,10 @@ std::string Sha2::compute_digest()
 
 void Sha2::run_round(const uint32_t *data)
 {
-    run_round(expand_data(*reinterpret_cast<const std::array<uint32_t, 16>*>(data)));
+    run_round(pre_process_data(*reinterpret_cast<const std::array<uint32_t, 16>*>(data)));
 }
 
-std::array<uint32_t, 64> Sha2::expand_data(const std::array<uint32_t, 16> &data)
+std::array<uint32_t, 64> Sha2::pre_process_data(const std::array<uint32_t, 16> &data)
 {
 #ifdef PRINT_Sha2_CONSUMED_DATA
     for(const auto elem : data)
@@ -119,7 +102,7 @@ std::array<uint32_t, 64> Sha2::expand_data(const std::array<uint32_t, 16> &data)
 #endif // PRINT_Sha2_CONSUMED_DATA
     std::array<uint32_t, 64> expanded_data;
     for(size_t i = 0; i < data.size(); ++i)
-        expanded_data[i] = swap_uint32(data[i]);
+        expanded_data[i] = swap_endianness_uint32(data[i]);
     for(size_t i = data.size(); i < expanded_data.size(); ++i)
     {
         const auto v0 = expanded_data[i - 15];
@@ -183,7 +166,7 @@ inline void Sha2::sha2_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, ui
 
 }
 
-void Sha2::add_padding()
+void Sha2::flush_end_of_message()
 {
     if(buffer_.size() > 0)
     {
@@ -193,6 +176,7 @@ void Sha2::add_padding()
         // Check if there are enough bytes to embed the 64 bit message size
         if(bytes_consumed_per_round_ - buffer_size < 8)
         {
+            // If not, flush run a round with the vurrent remaining data
             run_round(reinterpret_cast<const uint32_t*>(&buffer_[0]));
             std::fill(buffer_.begin(), buffer_.begin()+buffer_size, 0);
         }
@@ -202,8 +186,9 @@ void Sha2::add_padding()
         buffer_.resize(bytes_consumed_per_round_, 0);
         buffer_[0] = 1 << 7;
     }
+    // Append the 64 bits message info at the end
     auto offest_to_size_bits = buffer_.size() - 8;
-    *reinterpret_cast<uint64_t*>(&buffer_[offest_to_size_bits]) = swap_uint64(data_bytes_processed_*8);
+    *reinterpret_cast<uint64_t*>(&buffer_[offest_to_size_bits]) = swap_endianness_uint64(data_bytes_processed_*8);
     run_round(reinterpret_cast<const uint32_t*>(&buffer_[0]));
     buffer_.clear();
 }

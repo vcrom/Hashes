@@ -11,15 +11,14 @@ class Md5 : public HashingAlgorithm
 public:
     Md5();
     void reset() final;
-    std::string get_hash() final;
-
+    std::string get_digest() final;
 protected:
     union
     {
         std::array<uint8_t, 16> hash_;
         struct
         {
-            uint32_t a_, b_, c_, d_;
+            uint32_t h0_, h1_, h2_, h3_;
         };
 
     };

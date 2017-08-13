@@ -31,7 +31,8 @@ HEADERS += \
     md5.h \
     hashing_algorithm.h \
     sha1.h \
-    sha2.h
+    sha2.h \
+    hash_utils.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

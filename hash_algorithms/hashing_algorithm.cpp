@@ -51,7 +51,7 @@ void HashingAlgorithm::hash_data(const uint8_t* data, size_t len)
     data_bytes_processed_ += len;
 }
 
-void HashingAlgorithm::add_padding()
+void HashingAlgorithm::flush_end_of_message()
 {
     if(buffer_.size() > 0)
     {

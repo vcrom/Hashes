@@ -1,5 +1,7 @@
 #include "sha1.h"
 
+#include "hash_utils.h"
+
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -8,26 +10,10 @@
 //#define PRINT_SHA1_CONSUMED_DATA
 //#define PRINT_SHA1_PROCESSED_DATA
 
+using namespace hash_utils;
+
 namespace
 {
-constexpr size_t bytes_per_round = 64;
-constexpr auto left_rotate(uint32_t a, uint8_t b)
-{
-    return (a << b) | (a >> (32u - b));
-}
-
-inline uint32_t swap_uint32( uint32_t val )
-{
-    val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF );
-    return (val << 16) | (val >> 16);
-}
-uint64_t swap_uint64( uint64_t val )
-{
-    val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
-    val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
-    return (val << 32) | (val >> 32);
-}
-
 constexpr auto f1(const uint32_t &b, const uint32_t &c, const uint32_t &d)
 {
     return (b & c) | ((~b) & d);
@@ -44,6 +30,7 @@ constexpr auto f4(const uint32_t &b, const uint32_t &c, const uint32_t &d)
 {
     return f2(b, c, d);
 }
+constexpr size_t bytes_per_round = 64;
 }
 Sha1::Sha1() :
     HashingAlgorithm(bytes_per_round)
@@ -54,16 +41,16 @@ Sha1::Sha1() :
 void Sha1::reset()
 {
     HashingAlgorithm::reset();
-    a_ = 0x67452301;
-    b_ = 0xEFCDAB89;
-    c_ = 0x98BADCFE;
-    d_ = 0x10325476;
-    e_ = 0xC3D2E1F0;
+    h0_ = 0x67452301;
+    h1_ = 0xEFCDAB89;
+    h2_ = 0x98BADCFE;
+    h3_ = 0x10325476;
+    h4_ = 0xC3D2E1F0;
 }
 
-std::string Sha1::get_hash()
+std::string Sha1::get_digest()
 {
-    add_padding();
+    flush_end_of_message();
     const auto digest = compute_digest();
     reset();
     return digest;
@@ -80,10 +67,10 @@ std::string Sha1::compute_digest()
 
 void Sha1::run_round(const uint32_t *data)
 {
-    run_round(expand_data(*reinterpret_cast<const std::array<uint32_t, 16>*>(data)));
+    run_round(pre_process_data(*reinterpret_cast<const std::array<uint32_t, 16>*>(data)));
 }
 
-std::array<uint32_t, 80> Sha1::expand_data(const std::array<uint32_t, 16> &data)
+std::array<uint32_t, 80> Sha1::pre_process_data(const std::array<uint32_t, 16> &data)
 {
 #ifdef PRINT_SHA1_CONSUMED_DATA
     for(const auto elem : data)
@@ -92,7 +79,7 @@ std::array<uint32_t, 80> Sha1::expand_data(const std::array<uint32_t, 16> &data)
 #endif // PRINT_SHA1_CONSUMED_DATA
     std::array<uint32_t, 80> expanded_data;
     for(size_t i = 0; i < data.size(); ++i)
-        expanded_data[i] = swap_uint32(data[i]);
+        expanded_data[i] = swap_endianness_uint32(data[i]);
     for(size_t i = data.size(); i < expanded_data.size(); ++i)
     {
         expanded_data[i] = left_rotate(expanded_data[i-3]^expanded_data[i-8]
@@ -109,11 +96,11 @@ void Sha1::run_round(const std::array<uint32_t, 80> &data)
     std::cout << std::endl;
 #endif // PRINT_SHA1_PROCESSED_DATA
 
-    auto a = a_;
-    auto b = b_;
-    auto c = c_;
-    auto d = d_;
-    auto e = e_;
+    auto a = h0_;
+    auto b = h1_;
+    auto c = h2_;
+    auto d = h3_;
+    auto e = h4_;
 
     auto i = 0u;
     for(; i < 20; ++i)
@@ -125,11 +112,11 @@ void Sha1::run_round(const std::array<uint32_t, 80> &data)
     for(; i < 80; ++i)
         sha1_operation_round(a, b, c, d, e, data[i], f4(b, c, d), 0xCA62C1D6);
 
-    a_ += a;
-    b_ += b;
-    c_ += c;
-    d_ += d;
-    e_ += e;
+    h0_ += a;
+    h1_ += b;
+    h2_ += c;
+    h3_ += d;
+    h4_ += e;
 }
 
 inline void Sha1::sha1_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d, uint32_t &e,
@@ -143,7 +130,7 @@ inline void Sha1::sha1_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, ui
     a = temp;
 }
 
-void Sha1::add_padding()
+void Sha1::flush_end_of_message()
 {
     if(buffer_.size() > 0)
     {
@@ -163,7 +150,7 @@ void Sha1::add_padding()
         buffer_[0] = 1 << 7;
     }
     auto offest_to_size_bits = buffer_.size() - 8;
-    *reinterpret_cast<uint64_t*>(&buffer_[offest_to_size_bits]) = swap_uint64(data_bytes_processed_*8);
+    *reinterpret_cast<uint64_t*>(&buffer_[offest_to_size_bits]) = swap_endianness_uint64(data_bytes_processed_*8);
     run_round(reinterpret_cast<const uint32_t*>(&buffer_[0]));
     buffer_.clear();
 }
