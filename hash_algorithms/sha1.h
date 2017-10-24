@@ -32,7 +32,7 @@ private:
     void sha1_operation_round(uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d, uint32_t &e,
                                uint32_t data, uint32_t f, uint32_t k);
 
-    std::string Sha1::compute_digest();
+    std::string compute_digest();
 };
 
 #endif // SHA1_H
