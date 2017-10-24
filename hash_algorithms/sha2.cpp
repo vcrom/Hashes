@@ -33,22 +33,6 @@ constexpr std::array<uint32_t, 64> k_values = {
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-constexpr auto f1(const uint32_t &b, const uint32_t &c, const uint32_t &d)
-{
-    return (b & c) | ((~b) & d);
-}
-constexpr auto f2(const uint32_t &b, const uint32_t &c, const uint32_t &d)
-{
-    return b ^ c ^ d;
-}
-constexpr auto f3(const uint32_t &b, const uint32_t &c, const uint32_t &d)
-{
-    return (b & c) | (b & d) | (c & d);
-}
-constexpr auto f4(const uint32_t &b, const uint32_t &c, const uint32_t &d)
-{
-    return f2(b, c, d);
-}
 constexpr size_t bytes_per_round = 64;
 }
 
